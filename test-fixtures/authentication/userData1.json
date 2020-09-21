@@ -1,0 +1,8 @@
+{
+  "id": "foo",
+  "displayName": "foo bar",
+  "name": {"givenName": "foo", "familyName": "bar"},
+  "emails": [{"value": "foo@bar", "type": "work"}],
+  "organization": [{"name": "ALEPH"}],
+  "authorization": ["FOOBAR"]
+}
