@@ -29,7 +29,7 @@ import HttpStatus from 'http-status';
 import fetch from 'node-fetch';
 import {URL} from 'url';
 import {DOMParser} from 'xmldom';
-import {generateAuthorizationHeader, Error as AuthenticationError} from '@natlibfi/melinda-commons';
+import {Error as AuthenticationError} from '@natlibfi/melinda-commons';
 
 export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzApiKey}) {
   const xBaseURL = new URL(xServiceURL);
@@ -130,12 +130,12 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
     }
 
     async function getOwnTags(username) {
-      const url = new URL(ownAuthzURL);
-      url.searchParams.set('username', username);
+      const url = new URL(`${ownAuthzURL}/${username}`);
 
       const response = await fetch(url, {
         headers: {
-          Authorization: generateAuthorizationHeader(ownAuthzApiKey)
+          Authorization: `Bearer ${ownAuthzApiKey}`,
+          Accept: 'application/json'
         }
       });
 
