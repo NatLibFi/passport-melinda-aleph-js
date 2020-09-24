@@ -70,8 +70,7 @@ describe('authentication/service', () => {
           .reply(HttpStatus.OK, authnResponse1);
 
         nock('https://authz')
-          .get(/.*/u)
-          .query({username})
+          .get(`/${username}`)
           .reply(HttpStatus.OK, authzResponse1);
 
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
@@ -158,7 +157,7 @@ describe('authentication/service', () => {
         }
       });
 
-      it('Should fail to authenticate the user (Unexpecte error in authz service)', async () => {
+      it('Should fail to authenticate the user (Unexpected error in authz service)', async () => {
         const xServiceURL = 'https://authn';
         const ownAuthzURL = 'https://authz';
         const ownAuthApiKey = 'foobar';
@@ -175,8 +174,7 @@ describe('authentication/service', () => {
           .reply(HttpStatus.OK, authnResponse1);
 
         nock('https://authz')
-          .get(/.*/u)
-          .query({username})
+          .get(`/${username}`)
           .reply(HttpStatus.INTERNAL_SERVER_ERROR);
 
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
