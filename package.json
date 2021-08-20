@@ -35,11 +35,11 @@
 	},
 	"dependencies": {
 		"@natlibfi/melinda-commons": "^11.0.1",
+		"@xmldom/xmldom": ">=0.7.1 <1.0.0",
 		"http-status": "^1.4.2",
 		"node-fetch": "^2.6.0",
 		"passport": ">=0.4.1 <1.0.0",
-		"passport-http": ">=0.3.0 <1.0.0",
-		"xmldom": ">=0.3.0 <1.0.0"
+		"passport-http": ">=0.3.0 <1.0.0"
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.10.1",
