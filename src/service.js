@@ -4,7 +4,7 @@
 *
 * Passport authentication strategy for Melinda using Aleph credentials
 *
-* Copyright (C) 2018-2020 University Of Helsinki (The National Library Of Finland)
+* Copyright (C) 2018-2022 University Of Helsinki (The National Library Of Finland)
 *
 * This file is part of passport-melinda-aleph-js
 *
