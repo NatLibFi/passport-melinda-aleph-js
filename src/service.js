@@ -34,8 +34,12 @@ import {Error as AuthenticationError} from '@natlibfi/melinda-commons';
 function removeWWWAuthenticateHeader(res) {
   if (res?.headers?.has('WWW-Authenticate')) {
     res.headers.delete('WWW-Authenticate');
+    return true;
   }
+
+  return false;
 }
+
 
 export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzApiKey}) {
   const xBaseURL = new URL(xServiceURL);
