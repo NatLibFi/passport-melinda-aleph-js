@@ -31,16 +31,6 @@ import {URL} from 'url';
 import {DOMParser} from '@xmldom/xmldom';
 import {Error as AuthenticationError} from '@natlibfi/melinda-commons';
 
-function removeWWWAuthenticateHeader(res) {
-  if (res?.headers?.has('WWW-Authenticate')) {
-    res.headers.delete('WWW-Authenticate');
-    return true;
-  }
-
-  return false;
-}
-
-
 export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzApiKey}) {
   const xBaseURL = new URL(xServiceURL);
 
@@ -69,7 +59,9 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
       return {...userInfo, authorization: ownTags};
     }
 
-    removeWWWAuthenticateHeader(response);
+    if (response?.headers?.has('WWW-Authenticate')) {
+      response.headers.delete('WWW-Authenticate');
+    }
     const cleanBody = await response.text();
     throw new AuthenticationError(response.status, cleanBody);
 
