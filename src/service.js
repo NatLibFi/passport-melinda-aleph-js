@@ -59,10 +59,15 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
       return {...userInfo, authorization: ownTags};
     }
 
+    if (response?.headers?.has('WWW-Authenticate')) {
+      response.headers.delete('WWW-Authenticate');
+      throw new AuthenticationError(response.status, body);
+    }
+
     throw new AuthenticationError(response.status, body);
 
     function checkForErrors(doc) {
-      if (invalidReply() || hasErrors()) { // eslint-disable-line functional/no-conditional-statement
+      if (invalidReply() || hasErrors()) {
         throw new AuthenticationError(400, body);
       }
 
