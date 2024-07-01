@@ -29,7 +29,7 @@ import {BasicStrategy} from 'passport-http';
 import {createService} from './service';
 import {Error as AuthenticationError} from '@natlibfi/melinda-commons';
 
-export default class extends BasicStrategy {
+export class AlephStrategy extends BasicStrategy {
   constructor({xServiceURL, userLibrary, ownAuthzURL, ownAuthzApiKey}) {
     const AuthenticationService = createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzApiKey});
 
