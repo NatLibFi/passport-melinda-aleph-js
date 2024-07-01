@@ -62,8 +62,7 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
     if (response?.headers?.has('WWW-Authenticate')) {
       response.headers.delete('WWW-Authenticate');
     }
-    const cleanBody = await response.text();
-    throw new AuthenticationError(response.status, cleanBody);
+    throw new AuthenticationError(response.status, body);
 
     function checkForErrors(doc) {
       if (invalidReply() || hasErrors()) { // eslint-disable-line functional/no-conditional-statement
