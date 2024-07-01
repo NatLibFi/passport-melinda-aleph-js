@@ -61,6 +61,7 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
 
     if (response?.headers?.has('WWW-Authenticate')) {
       response.headers.delete('WWW-Authenticate');
+      throw new AuthenticationError(response.status, body);
     }
     throw new AuthenticationError(response.status, body);
 
