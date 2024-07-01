@@ -31,6 +31,12 @@ import {URL} from 'url';
 import {DOMParser} from '@xmldom/xmldom';
 import {Error as AuthenticationError} from '@natlibfi/melinda-commons';
 
+function removeWWWAuthenticateHeader(res) {
+  if (res?.headers?.has('WWW-Authenticate')) {
+    res.headers.delete('WWW-Authenticate');
+  }
+}
+
 export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzApiKey}) {
   const xBaseURL = new URL(xServiceURL);
 
@@ -59,7 +65,9 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
       return {...userInfo, authorization: ownTags};
     }
 
-    throw new AuthenticationError(response.status, body);
+    removeWWWAuthenticateHeader(response);
+    const cleanBody = await response.text();
+    throw new AuthenticationError(response.status, cleanBody);
 
     function checkForErrors(doc) {
       if (invalidReply() || hasErrors()) { // eslint-disable-line functional/no-conditional-statement
