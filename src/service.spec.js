@@ -101,7 +101,6 @@ describe('authentication/service', () => {
           await service.authenticate({username, password});
           throw new Error('Should throw');
         } catch (err) {
-          console.log(err); // eslint-disable-line
           expect(err).to.be.an.instanceof(AuthenticationError);
         }
       });
