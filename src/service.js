@@ -38,6 +38,7 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
 
   return {authenticate};
 
+  // eslint-disable-next-line max-statements
   async function authenticate({username, password}) {
     const requestURL = new URL(xBaseURL);
 
@@ -45,11 +46,13 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
     requestURL.searchParams.set('staff_pass', password);
 
     // eslint-disable-next-line no-console
-    console.log(`Fetching: ${requestURL}`);
+    //console.log(`Fetching: ${requestURL}`);
     const response = await fetch(requestURL);
     // eslint-disable-next-line no-console
-    console.log(`Response: ${response}`);
+    //console.log(`Response: ${JSON.stringify(response)}`);
     const body = await response.text();
+    // eslint-disable-next-line no-console
+    //console.log(`Response: ${JSON.stringify(body)}`);
 
     if (response.status === HttpStatus.OK) {
       // @xmldom/xmldom v9.0.1
