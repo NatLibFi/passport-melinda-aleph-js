@@ -44,7 +44,11 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
     requestURL.searchParams.set('staff_user', username);
     requestURL.searchParams.set('staff_pass', password);
 
+    // eslint-disable-next-line no-console
+    console.log(`Fetching: ${requestURL}`);
     const response = await fetch(requestURL);
+    // eslint-disable-next-line no-console
+    console.log(`Response: ${response}`);
     const body = await response.text();
 
     if (response.status === HttpStatus.OK) {
