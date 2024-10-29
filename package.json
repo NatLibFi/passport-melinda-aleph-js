@@ -14,7 +14,7 @@
 		"url": "git@github.com:natlibfi/passport-melinda-aleph-js.git"
 	},
 	"license": "LGPL-3.0+",
-	"version": "3.0.2",
+	"version": "3.0.3-alpha.3",
 	"main": "./dist/index.js",
 	"engines": {
 		"node": ">=18"
@@ -35,18 +35,19 @@
 	},
 	"dependencies": {
 		"@natlibfi/melinda-commons": "^12.0.9",
-		"@xmldom/xmldom": "^0.9.4",
-		"http-status": "^1.7.4",
+		"@xmldom/xmldom": "^0.9.5",
+		"debug": "^4.3.7",
+		"http-status": "^1.8.1",
 		"passport": "^0.7.0",
 		"passport-http": "^0.3.0"
 	},
 	"devDependencies": {
-		"@babel/cli": "^7.25.7",
-		"@babel/core": "^7.25.8",
-		"@babel/eslint-parser": "^7.25.8",
-		"@babel/node": "^7.25.7",
-		"@babel/preset-env": "^7.25.8",
-		"@babel/register": "^7.25.7",
+		"@babel/cli": "^7.25.9",
+		"@babel/core": "^7.26.0",
+		"@babel/eslint-parser": "^7.25.9",
+		"@babel/node": "^7.26.0",
+		"@babel/preset-env": "^7.26.0",
+		"@babel/register": "^7.25.9",
 		"@natlibfi/eslint-config-melinda-backend": "^2.0.2",
 		"@natlibfi/fixugen-http-client": "^2.0.1",
 		"@natlibfi/fixura": "^2.2.5",

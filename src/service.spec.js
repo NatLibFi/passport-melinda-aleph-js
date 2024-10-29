@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
 *
 * @licstart  The following is the entire license notice for the JavaScript code in this file.
@@ -33,6 +34,9 @@ import HttpStatus from 'http-status';
 import nock from 'nock';
 import * as testContext from './service';
 import {Error as AuthenticationError} from '@natlibfi/melinda-commons';
+//import {createDebugLogger} from 'debug';
+
+//const debug = createDebugLogger('@natlibfi/passport-melinda-aleph:test');
 
 const FIXTURES_PATH = path.join(__dirname, '../test-fixtures/authentication');
 const authnResponse1 = fs.readFileSync(path.resolve(FIXTURES_PATH, 'authnResponse1.xml'), 'utf8');
@@ -54,6 +58,7 @@ describe('authentication/service', () => {
       });
 
       it('Should authenticate the user succesfully', async () => {
+        console.log(`FOOBAR`);
         const xServiceURL = 'https://authn';
         const ownAuthzURL = 'https://authz';
         const ownAuthApiKey = 'foobar';
@@ -61,8 +66,9 @@ describe('authentication/service', () => {
         const username = 'foo';
         const password = 'bar';
 
+        // https://authn/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
         nock('https://authn')
-          .get(/.*/u)
+          .get('/')
           .query({
             op: 'user-auth', library: userLibrary,
             staff_user: username, staff_pass: password // eslint-disable-line camelcase
@@ -72,6 +78,10 @@ describe('authentication/service', () => {
         nock('https://authz')
           .get(`/${username}`)
           .reply(HttpStatus.OK, authzResponse1);
+
+        //debug(`Testing`);
+        // eslint-disable-next-line no-console
+        console.log(`Testing`);
 
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
         const user = await service.authenticate({username, password});
@@ -87,8 +97,9 @@ describe('authentication/service', () => {
         const username = 'foo';
         const password = 'bar';
 
+        // https://authn/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
         nock('https://authn')
-          .get(/.*/u)
+          .get('/')
           .query({
             op: 'user-auth', library: userLibrary,
             staff_user: username, staff_pass: password // eslint-disable-line camelcase
@@ -114,7 +125,7 @@ describe('authentication/service', () => {
         const password = 'bar';
 
         nock('https://authn')
-          .get(/.*/u)
+          .get('/')
           .query({
             op: 'user-auth', library: userLibrary,
             staff_user: username, staff_pass: password // eslint-disable-line camelcase
@@ -140,7 +151,7 @@ describe('authentication/service', () => {
         const password = 'bar';
 
         nock('https://authn')
-          .get(/.*/u)
+          .get('/')
           .query({
             op: 'user-auth', library: userLibrary,
             staff_user: username, staff_pass: password // eslint-disable-line camelcase
@@ -166,7 +177,7 @@ describe('authentication/service', () => {
         const password = 'bar';
 
         nock('https://authn')
-          .get(/.*/u)
+          .get('/')
           .query({
             op: 'user-auth', library: userLibrary,
             staff_user: username, staff_pass: password // eslint-disable-line camelcase

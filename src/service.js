@@ -44,11 +44,17 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
     requestURL.searchParams.set('staff_user', username);
     requestURL.searchParams.set('staff_pass', password);
 
+    // eslint-disable-next-line no-console
+    console.log(`Fetching: ${requestURL}`);
     const response = await fetch(requestURL);
+    // eslint-disable-next-line no-console
+    console.log(`Response: ${response}`);
     const body = await response.text();
 
     if (response.status === HttpStatus.OK) {
-      const doc = new DOMParser().parseFromString(body);
+      // @xmldom/xmldom v9.0.1
+      // 0.9.1: DOMParser.parseFromString requires mimeType as second argument #713
+      const doc = new DOMParser().parseFromString(body, 'text/xml');
 
       checkForErrors(doc);
 
