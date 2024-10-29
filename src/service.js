@@ -48,7 +48,9 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
     const body = await response.text();
 
     if (response.status === HttpStatus.OK) {
-      const doc = new DOMParser().parseFromString(body);
+      // @xmldom/xmldom v9.0.1
+      // 0.9.1: DOMParser.parseFromString requires mimeType as second argument #713
+      const doc = new DOMParser().parseFromString(body, 'text/xml');
 
       checkForErrors(doc);
 
