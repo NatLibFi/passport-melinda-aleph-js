@@ -59,7 +59,7 @@ describe('authentication/service', () => {
 
       it('Should authenticate the user succesfully', async () => {
         console.log(`FOOBAR`);
-        const xServiceURL = 'https://authn';
+        const xServiceURL = 'https://aleph-x-proxy.melinda-test.kansalliskirjasto.fi/X';
         const ownAuthzURL = 'https://authz';
         const ownAuthApiKey = 'foobar';
         const userLibrary = 'foo';
@@ -67,7 +67,7 @@ describe('authentication/service', () => {
         const password = 'bar';
 
         // https://authn/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
-        nock('https://authn')
+        nock('https://aleph-x-proxy.melinda-test.kansalliskirjasto.fi/X')
           .get('/')
           .query({
             op: 'user-auth', library: userLibrary,
