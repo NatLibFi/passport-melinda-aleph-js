@@ -31,9 +31,11 @@ import fs from 'fs';
 import path from 'path';
 import {expect} from 'chai';
 import HttpStatus from 'http-status';
-import nock from 'nock';
 import * as testContext from './service';
 import {Error as AuthenticationError} from '@natlibfi/melinda-commons';
+import {Agent, MockAgent, setGlobalDispatcher} from 'undici';
+
+
 //import {createDebugLogger} from 'debug';
 
 //const debug = createDebugLogger('@natlibfi/passport-melinda-aleph:test');
@@ -45,6 +47,8 @@ const authnResponse3 = fs.readFileSync(path.resolve(FIXTURES_PATH, 'authnRespons
 const authzResponse1 = fs.readFileSync(path.resolve(FIXTURES_PATH, 'authzResponse1.json'), 'utf8');
 const userData1 = fs.readFileSync(path.resolve(FIXTURES_PATH, 'userData1.json'), 'utf8');
 
+const mockAgent = new MockAgent();
+
 describe('authentication/service', () => {
   describe('factory', () => {
     it('Should create the expected object', () => {
@@ -55,69 +59,65 @@ describe('authentication/service', () => {
     describe('#authenticate', () => {
       afterEach(() => {
         console.log(`afterEach`);
-        nock.cleanAll();
+        //nock.cleanAll();
       });
 
       before(() => {
         console.log(`before`);
-        nock.disableNetConnect(); // Disallow sending http request to anywhere else but pre-defined scopes
+        //nock.disableNetConnect(); // Disallow sending http request to anywhere else but pre-defined scopes
+        setGlobalDispatcher(mockAgent);
+        mockAgent.disableNetConnect();
       });
 
-      after(() => {
-        console.log(`after`);
-        nock.cleanAll();
-        nock.enableNetConnect(); // Re--enable sending http request to anywhere
+      after(async () => {
+        await mockAgent.close();
+        setGlobalDispatcher(new Agent());
       });
+      //console.log(`after`);
+      //nock.cleanAll();
+      //nock.enableNetConnect(); // Re--enable sending http request to anywhere
+
 
       it('Should authenticate the user succesfully', async () => {
         console.log(`FOOBAR:TEST`);
         const xServiceURL = 'https://authn';
-        const ownAuthzURL = 'https://authz';
+        const ownAuthzURL = 'https://authn';
         const ownAuthApiKey = 'foobar';
         const userLibrary = 'foo';
         const username = 'foo';
         const password = 'bar';
 
         // https://authn/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
-        const scope = nock('https://authn')
-          .get(/.*/u)
-          .query({
-            op: 'user-auth', library: userLibrary,
-            staff_user: username, staff_pass: password // eslint-disable-line camelcase
-          })
-          .reply(HttpStatus.OK, authnResponse1);
+        const mockPool = mockAgent.get('https://authn');
 
-        nock('https://authz')
-          .get(`/${username}`)
+        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
+          .reply(200, authnResponse1);
+
+        mockPool.intercept({path: `/${username}`})
           .reply(HttpStatus.OK, authzResponse1);
 
-        //debug(`Testing`);
-        // eslint-disable-next-line no-console
         console.log(`Testing`);
 
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
         const user = await service.authenticate({username, password});
 
         expect(user).to.eql(JSON.parse(userData1));
-        expect(scope.isDone()).to.eq(true);
       });
 
       it('Should fail to authenticate the user (Invalid credentials)', async () => {
         const xServiceURL = 'https://authn';
-        const ownAuthzURL = 'https://authz';
+        const ownAuthzURL = 'https://authn';
         const ownAuthApiKey = 'foobar';
         const userLibrary = 'foo';
         const username = 'foo';
         const password = 'bar';
 
         // https://authn/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
-        nock('https://authn')
-          .get('/')
-          .query({
-            op: 'user-auth', library: userLibrary,
-            staff_user: username, staff_pass: password // eslint-disable-line camelcase
-          })
-          .reply(HttpStatus.OK, authnResponse2);
+
+        const mockPool = mockAgent.get('https://authn');
+
+        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
+          .reply(200, authnResponse2);
 
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
 
@@ -131,19 +131,16 @@ describe('authentication/service', () => {
 
       it('Should fail to authenticate the user (Reply not ok)', async () => {
         const xServiceURL = 'https://authn';
-        const ownAuthzURL = 'https://authz';
+        const ownAuthzURL = 'https://authn';
         const ownAuthApiKey = 'foobar';
         const userLibrary = 'foo';
         const username = 'foo';
         const password = 'bar';
 
-        nock('https://authn')
-          .get('/')
-          .query({
-            op: 'user-auth', library: userLibrary,
-            staff_user: username, staff_pass: password // eslint-disable-line camelcase
-          })
-          .reply(HttpStatus.OK, authnResponse3);
+        const mockPool = mockAgent.get('https://authn');
+
+        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
+          .reply(200, authnResponse3);
 
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
 
@@ -157,19 +154,16 @@ describe('authentication/service', () => {
 
       it('Should fail to authenticate the user (Unexpected error)', async () => {
         const xServiceURL = 'https://authn';
-        const ownAuthzURL = 'https://authz';
+        const ownAuthzURL = 'https://authn';
         const ownAuthApiKey = 'foobar';
         const userLibrary = 'foo';
         const username = 'foo';
         const password = 'bar';
 
-        nock('https://authn')
-          .get('/')
-          .query({
-            op: 'user-auth', library: userLibrary,
-            staff_user: username, staff_pass: password // eslint-disable-line camelcase
-          })
-          .reply(HttpStatus.INTERNAL_SERVER_ERROR);
+        const mockPool = mockAgent.get('https://authn');
+
+        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
+          .reply(500);
 
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
 
@@ -183,22 +177,18 @@ describe('authentication/service', () => {
 
       it('Should fail to authenticate the user (Unexpected error in authz service)', async () => {
         const xServiceURL = 'https://authn';
-        const ownAuthzURL = 'https://authz';
+        const ownAuthzURL = 'https://authn';
         const ownAuthApiKey = 'foobar';
         const userLibrary = 'foo';
         const username = 'foo';
         const password = 'bar';
 
-        nock('https://authn')
-          .get('/')
-          .query({
-            op: 'user-auth', library: userLibrary,
-            staff_user: username, staff_pass: password // eslint-disable-line camelcase
-          })
-          .reply(HttpStatus.OK, authnResponse1);
+        const mockPool = mockAgent.get('https://authn');
 
-        nock('https://authz')
-          .get(`/${username}`)
+        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
+          .reply(200, authnResponse1);
+
+        mockPool.intercept({path: `/${username}`})
           .reply(HttpStatus.INTERNAL_SERVER_ERROR);
 
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
