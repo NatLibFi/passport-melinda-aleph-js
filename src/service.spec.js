@@ -54,12 +54,24 @@ describe('authentication/service', () => {
 
     describe('#authenticate', () => {
       afterEach(() => {
+        console.log(`afterEach`);
         nock.cleanAll();
       });
 
+      before(() => {
+        console.log(`before`);
+        nock.disableNetConnect(); // Disallow sending http request to anywhere else but pre-defined scopes
+      });
+
+      after(() => {
+        console.log(`after`);
+        nock.cleanAll();
+        nock.enableNetConnect(); // Re--enable sending http request to anywhere
+      });
+
       it('Should authenticate the user succesfully', async () => {
-        console.log(`FOOBAR`);
-        const xServiceURL = 'https://aleph-x-proxy.melinda-test.kansalliskirjasto.fi/X';
+        console.log(`FOOBAR:TEST`);
+        const xServiceURL = 'https://authn';
         const ownAuthzURL = 'https://authz';
         const ownAuthApiKey = 'foobar';
         const userLibrary = 'foo';
@@ -67,8 +79,8 @@ describe('authentication/service', () => {
         const password = 'bar';
 
         // https://authn/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
-        nock('https://aleph-x-proxy.melinda-test.kansalliskirjasto.fi/X')
-          .get('/')
+        const scope = nock('https://authn')
+          .get(/.*/u)
           .query({
             op: 'user-auth', library: userLibrary,
             staff_user: username, staff_pass: password // eslint-disable-line camelcase
@@ -87,6 +99,7 @@ describe('authentication/service', () => {
         const user = await service.authenticate({username, password});
 
         expect(user).to.eql(JSON.parse(userData1));
+        expect(scope.isDone()).to.eq(true);
       });
 
       it('Should fail to authenticate the user (Invalid credentials)', async () => {
