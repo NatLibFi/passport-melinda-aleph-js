@@ -1,42 +1,13 @@
-/* eslint-disable no-console */
-/**
-*
-* @licstart  The following is the entire license notice for the JavaScript code in this file.
-*
-* Passport authentication strategy for Melinda using Aleph credentials
-*
-* Copyright (C) 2018-2022 University Of Helsinki (The National Library Of Finland)
-*
-* This file is part of passport-melinda-aleph-js
-*
-* passport-melinda-aleph-js program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU Lesser General Public License as
-* published by the Free Software Foundation, either version 3 of the
-* License, or (at your option) any later version.
-*
-* passport-melinda-aleph-js is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU Lesser General Public License for more details.
-*
-* You should have received a copy of the GNU Lesser General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*
-* @licend  The above is the entire license notice
-* for the JavaScript code in this file.
-*
-*/
-
 import fs from 'fs';
 import path from 'path';
 import {expect} from 'chai';
 import HttpStatus from 'http-status';
-import nock from 'nock';
 import * as testContext from './service';
 import {Error as AuthenticationError} from '@natlibfi/melinda-commons';
-//import {createDebugLogger} from 'debug';
+import {Agent, MockAgent, setGlobalDispatcher} from 'undici';
+import createDebugLogger from 'debug';
 
-//const debug = createDebugLogger('@natlibfi/passport-melinda-aleph:test');
+const debug = createDebugLogger('@natlibfi/passport-melinda-aleph:test');
 
 const FIXTURES_PATH = path.join(__dirname, '../test-fixtures/authentication');
 const authnResponse1 = fs.readFileSync(path.resolve(FIXTURES_PATH, 'authnResponse1.xml'), 'utf8');
@@ -45,44 +16,51 @@ const authnResponse3 = fs.readFileSync(path.resolve(FIXTURES_PATH, 'authnRespons
 const authzResponse1 = fs.readFileSync(path.resolve(FIXTURES_PATH, 'authzResponse1.json'), 'utf8');
 const userData1 = fs.readFileSync(path.resolve(FIXTURES_PATH, 'userData1.json'), 'utf8');
 
+const mockAgent = new MockAgent();
+
 describe('authentication/service', () => {
   describe('factory', () => {
     it('Should create the expected object', () => {
-      const service = testContext.createService({xServiceURL: 'https://auth', userLibrary: 'foo'});
+      const service = testContext.createService({xServiceURL: 'https://authn', userLibrary: 'foo'});
       expect(service).to.be.an('object').and.respondTo('authenticate');
     });
 
     describe('#authenticate', () => {
-      afterEach(() => {
-        nock.cleanAll();
+
+      before(() => {
+        debug(`before`);
+        setGlobalDispatcher(mockAgent);
+        mockAgent.disableNetConnect();
+      });
+
+      after(async () => {
+        debug(`after`);
+        await mockAgent.close();
+        setGlobalDispatcher(new Agent());
       });
 
       it('Should authenticate the user succesfully', async () => {
-        console.log(`FOOBAR`);
-        const xServiceURL = 'https://aleph-x-proxy.melinda-test.kansalliskirjasto.fi/X';
-        const ownAuthzURL = 'https://authz';
+        debug(`TEST`);
+
+        // We have same URL for both services, so that undici mock can interrupt both calls
+        const xServiceURL = 'https://authn';
+        const ownAuthzURL = 'https://authn';
         const ownAuthApiKey = 'foobar';
         const userLibrary = 'foo';
         const username = 'foo';
         const password = 'bar';
 
-        // https://authn/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
-        nock('https://aleph-x-proxy.melinda-test.kansalliskirjasto.fi/X')
-          .get('/')
-          .query({
-            op: 'user-auth', library: userLibrary,
-            staff_user: username, staff_pass: password // eslint-disable-line camelcase
-          })
-          .reply(HttpStatus.OK, authnResponse1);
+        const mockPool = mockAgent.get('https://authn');
 
-        nock('https://authz')
-          .get(`/${username}`)
+        // https://authn/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
+        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
+          .reply(200, authnResponse1);
+
+        // https://authn/foo
+        mockPool.intercept({path: `/${username}`})
           .reply(HttpStatus.OK, authzResponse1);
 
-        //debug(`Testing`);
-        // eslint-disable-next-line no-console
-        console.log(`Testing`);
-
+        debug(`Testing`);
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
         const user = await service.authenticate({username, password});
 
@@ -90,21 +68,21 @@ describe('authentication/service', () => {
       });
 
       it('Should fail to authenticate the user (Invalid credentials)', async () => {
+
+        // We have same URL for both services, so that undici mock can interrupt both calls
         const xServiceURL = 'https://authn';
-        const ownAuthzURL = 'https://authz';
+        const ownAuthzURL = 'https://authn';
         const ownAuthApiKey = 'foobar';
         const userLibrary = 'foo';
         const username = 'foo';
         const password = 'bar';
 
         // https://authn/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
-        nock('https://authn')
-          .get('/')
-          .query({
-            op: 'user-auth', library: userLibrary,
-            staff_user: username, staff_pass: password // eslint-disable-line camelcase
-          })
-          .reply(HttpStatus.OK, authnResponse2);
+
+        const mockPool = mockAgent.get('https://authn');
+
+        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
+          .reply(200, authnResponse2);
 
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
 
@@ -112,25 +90,23 @@ describe('authentication/service', () => {
           await service.authenticate({username, password});
           throw new Error('Should throw');
         } catch (err) {
+          //debug(`Error: ${err.message}`);
           expect(err).to.be.an.instanceof(AuthenticationError);
         }
       });
 
       it('Should fail to authenticate the user (Reply not ok)', async () => {
         const xServiceURL = 'https://authn';
-        const ownAuthzURL = 'https://authz';
+        const ownAuthzURL = 'https://authn';
         const ownAuthApiKey = 'foobar';
         const userLibrary = 'foo';
         const username = 'foo';
         const password = 'bar';
 
-        nock('https://authn')
-          .get('/')
-          .query({
-            op: 'user-auth', library: userLibrary,
-            staff_user: username, staff_pass: password // eslint-disable-line camelcase
-          })
-          .reply(HttpStatus.OK, authnResponse3);
+        const mockPool = mockAgent.get('https://authn');
+
+        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
+          .reply(200, authnResponse3);
 
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
 
@@ -138,25 +114,25 @@ describe('authentication/service', () => {
           await service.authenticate({username, password});
           throw new Error('Should throw');
         } catch (err) {
+          //debug(`Error: ${err.message}`);
           expect(err).to.be.an.instanceof(AuthenticationError);
         }
       });
 
       it('Should fail to authenticate the user (Unexpected error)', async () => {
+
+        // We have same URL for both services, so that undici mock can interrupt both calls
         const xServiceURL = 'https://authn';
-        const ownAuthzURL = 'https://authz';
+        const ownAuthzURL = 'https://authn';
         const ownAuthApiKey = 'foobar';
         const userLibrary = 'foo';
         const username = 'foo';
         const password = 'bar';
 
-        nock('https://authn')
-          .get('/')
-          .query({
-            op: 'user-auth', library: userLibrary,
-            staff_user: username, staff_pass: password // eslint-disable-line camelcase
-          })
-          .reply(HttpStatus.INTERNAL_SERVER_ERROR);
+        const mockPool = mockAgent.get('https://authn');
+
+        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
+          .reply(500);
 
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
 
@@ -164,28 +140,27 @@ describe('authentication/service', () => {
           await service.authenticate({username, password});
           throw new Error('Should throw');
         } catch (err) {
+          //debug(`Error: ${err.message}`);
           expect(err).to.be.an('error');
         }
       });
 
       it('Should fail to authenticate the user (Unexpected error in authz service)', async () => {
+
+        // We have same URL for both services, so that undici mock can interrupt both calls
         const xServiceURL = 'https://authn';
-        const ownAuthzURL = 'https://authz';
+        const ownAuthzURL = 'https://authn';
         const ownAuthApiKey = 'foobar';
         const userLibrary = 'foo';
         const username = 'foo';
         const password = 'bar';
 
-        nock('https://authn')
-          .get('/')
-          .query({
-            op: 'user-auth', library: userLibrary,
-            staff_user: username, staff_pass: password // eslint-disable-line camelcase
-          })
-          .reply(HttpStatus.OK, authnResponse1);
+        const mockPool = mockAgent.get('https://authn');
 
-        nock('https://authz')
-          .get(`/${username}`)
+        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
+          .reply(200, authnResponse1);
+
+        mockPool.intercept({path: `/${username}`})
           .reply(HttpStatus.INTERNAL_SERVER_ERROR);
 
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
@@ -194,6 +169,7 @@ describe('authentication/service', () => {
           await service.authenticate({username, password});
           throw new Error('Should throw');
         } catch (err) {
+          //debug(`Error: ${err.message}`);
           expect(err).to.be.an('error');
         }
       });
