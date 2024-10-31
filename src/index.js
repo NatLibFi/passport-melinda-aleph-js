@@ -1,3 +1,4 @@
+/* eslint-disable functional/no-this-expressions */
 /**
 *
 * @licstart  The following is the entire license notice for the JavaScript code in this file.
@@ -48,6 +49,6 @@ export class AlephStrategy extends BasicStrategy {
         });
     });
 
-    this.name = 'melinda'; // eslint-disable-line functional/no-this-expression
+    this.name = 'melinda'; // eslint-disable-line functional/no-this-expressions
   }
 }
