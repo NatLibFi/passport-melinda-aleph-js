@@ -49,16 +49,14 @@
 		"@babel/preset-env": "^7.26.0",
 		"@babel/register": "^7.25.9",
 		"@natlibfi/eslint-config-melinda-backend": "^3.0.5",
-		"@natlibfi/fixugen-http-client": "^2.0.1",
-		"@natlibfi/fixura": "^2.2.5",
-		"babel-plugin-istanbul": "^6.1.1",
+		"babel-plugin-istanbul": "^7.0.0",
 		"babel-plugin-rewire": "^1.2.0",
 		"chai": "^4.5.0",
 		"cross-env": "^7.0.3",
 		"eslint": "^8.57.1",
 		"mocha": "^10.7.3",
 		"nodemon": "^3.1.7",
-		"nyc": "^15.1.0",
+		"nyc": "^17.1.0",
 		"undici": "^6.20.1"
 	},
 	"eslintConfig": {
