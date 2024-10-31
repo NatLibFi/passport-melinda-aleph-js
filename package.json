@@ -37,7 +37,7 @@
 		"@natlibfi/melinda-commons": "^13.0.18",
 		"@xmldom/xmldom": "^0.9.5",
 		"debug": "^4.3.7",
-		"http-status": "^1.8.1",
+		"http-status": "^2.0.0",
 		"passport": "^0.7.0",
 		"passport-http": "^0.3.0"
 	},
