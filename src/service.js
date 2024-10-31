@@ -4,7 +4,7 @@
 *
 * Passport authentication strategy for Melinda using Aleph credentials
 *
-* Copyright (C) 2018-2022 University Of Helsinki (The National Library Of Finland)
+* Copyright (C) 2018-2024 University Of Helsinki (The National Library Of Finland)
 *
 * This file is part of passport-melinda-aleph-js
 *
@@ -29,6 +29,10 @@ import HttpStatus from 'http-status';
 import {URL} from 'url';
 import {DOMParser} from '@xmldom/xmldom';
 import {Error as AuthenticationError} from '@natlibfi/melinda-commons';
+import createDebugLogger from 'debug';
+
+const debugDev = createDebugLogger('@natlibfi/passport-melinda-aleph:dev');
+const debugDevData = debugDev.extend('data');
 
 export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzApiKey}) {
   const xBaseURL = new URL(xServiceURL);
@@ -45,14 +49,10 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
     requestURL.searchParams.set('staff_user', username);
     requestURL.searchParams.set('staff_pass', password);
 
-    // eslint-disable-next-line no-console
-    //console.log(`Fetching: ${requestURL}`);
+    debugDev(`Fetching: ${requestURL}`);
     const response = await fetch(requestURL);
-    // eslint-disable-next-line no-console
-    //console.log(`Response: ${JSON.stringify(response)}`);
     const body = await response.text();
-    // eslint-disable-next-line no-console
-    //console.log(`Response: ${JSON.stringify(body)}`);
+    debugDevData(`Response (status: ${response.status}): ${JSON.stringify(body)}`);
 
     if (response.status === HttpStatus.OK) {
       // @xmldom/xmldom v9.0.1
@@ -144,13 +144,14 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
 
     async function getOwnTags(username) {
       const url = new URL(`${ownAuthzURL}/${username}`);
+      debugDev(`Fetching: ${url}`);
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${ownAuthzApiKey}`,
           Accept: 'application/json'
         }
       });
-
+      debugDevData(`Response status: ${response.status}`);
       if (response.status === HttpStatus.OK) {
         return response.json();
       }

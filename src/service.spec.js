@@ -34,11 +34,9 @@ import HttpStatus from 'http-status';
 import * as testContext from './service';
 import {Error as AuthenticationError} from '@natlibfi/melinda-commons';
 import {Agent, MockAgent, setGlobalDispatcher} from 'undici';
+import createDebugLogger from 'debug';
 
-
-//import {createDebugLogger} from 'debug';
-
-//const debug = createDebugLogger('@natlibfi/passport-melinda-aleph:test');
+const debug = createDebugLogger('@natlibfi/passport-melinda-aleph:test');
 
 const FIXTURES_PATH = path.join(__dirname, '../test-fixtures/authentication');
 const authnResponse1 = fs.readFileSync(path.resolve(FIXTURES_PATH, 'authnResponse1.xml'), 'utf8');
@@ -52,34 +50,28 @@ const mockAgent = new MockAgent();
 describe('authentication/service', () => {
   describe('factory', () => {
     it('Should create the expected object', () => {
-      const service = testContext.createService({xServiceURL: 'https://auth', userLibrary: 'foo'});
+      const service = testContext.createService({xServiceURL: 'https://authn', userLibrary: 'foo'});
       expect(service).to.be.an('object').and.respondTo('authenticate');
     });
 
     describe('#authenticate', () => {
-      afterEach(() => {
-        console.log(`afterEach`);
-        //nock.cleanAll();
-      });
 
       before(() => {
-        console.log(`before`);
-        //nock.disableNetConnect(); // Disallow sending http request to anywhere else but pre-defined scopes
+        debug(`before`);
         setGlobalDispatcher(mockAgent);
         mockAgent.disableNetConnect();
       });
 
       after(async () => {
+        debug(`after`);
         await mockAgent.close();
         setGlobalDispatcher(new Agent());
       });
-      //console.log(`after`);
-      //nock.cleanAll();
-      //nock.enableNetConnect(); // Re--enable sending http request to anywhere
-
 
       it('Should authenticate the user succesfully', async () => {
-        console.log(`FOOBAR:TEST`);
+        debug(`TEST`);
+
+        // We have same URL for both services, so that undici mock can interrupt both calls
         const xServiceURL = 'https://authn';
         const ownAuthzURL = 'https://authn';
         const ownAuthApiKey = 'foobar';
@@ -87,17 +79,17 @@ describe('authentication/service', () => {
         const username = 'foo';
         const password = 'bar';
 
-        // https://authn/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
         const mockPool = mockAgent.get('https://authn');
 
+        // https://authn/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
         mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
           .reply(200, authnResponse1);
 
+        // https://authn/foo
         mockPool.intercept({path: `/${username}`})
           .reply(HttpStatus.OK, authzResponse1);
 
-        console.log(`Testing`);
-
+        debug(`Testing`);
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
         const user = await service.authenticate({username, password});
 
@@ -105,6 +97,8 @@ describe('authentication/service', () => {
       });
 
       it('Should fail to authenticate the user (Invalid credentials)', async () => {
+
+        // We have same URL for both services, so that undici mock can interrupt both calls
         const xServiceURL = 'https://authn';
         const ownAuthzURL = 'https://authn';
         const ownAuthApiKey = 'foobar';
@@ -125,6 +119,7 @@ describe('authentication/service', () => {
           await service.authenticate({username, password});
           throw new Error('Should throw');
         } catch (err) {
+          //debug(`Error: ${err.message}`);
           expect(err).to.be.an.instanceof(AuthenticationError);
         }
       });
@@ -148,11 +143,14 @@ describe('authentication/service', () => {
           await service.authenticate({username, password});
           throw new Error('Should throw');
         } catch (err) {
+          //debug(`Error: ${err.message}`);
           expect(err).to.be.an.instanceof(AuthenticationError);
         }
       });
 
       it('Should fail to authenticate the user (Unexpected error)', async () => {
+
+        // We have same URL for both services, so that undici mock can interrupt both calls
         const xServiceURL = 'https://authn';
         const ownAuthzURL = 'https://authn';
         const ownAuthApiKey = 'foobar';
@@ -171,11 +169,14 @@ describe('authentication/service', () => {
           await service.authenticate({username, password});
           throw new Error('Should throw');
         } catch (err) {
+          //debug(`Error: ${err.message}`);
           expect(err).to.be.an('error');
         }
       });
 
       it('Should fail to authenticate the user (Unexpected error in authz service)', async () => {
+
+        // We have same URL for both services, so that undici mock can interrupt both calls
         const xServiceURL = 'https://authn';
         const ownAuthzURL = 'https://authn';
         const ownAuthApiKey = 'foobar';
@@ -197,6 +198,7 @@ describe('authentication/service', () => {
           await service.authenticate({username, password});
           throw new Error('Should throw');
         } catch (err) {
+          //debug(`Error: ${err.message}`);
           expect(err).to.be.an('error');
         }
       });
