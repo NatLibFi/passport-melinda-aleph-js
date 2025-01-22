@@ -34,7 +34,7 @@
 		"watch:test": "cross-env DEBUG=1 NODE_ENV=test nodemon -w src -w test-fixtures --exec 'npm run test:dev'"
 	},
 	"dependencies": {
-		"@natlibfi/melinda-commons": "^13.0.19-alpha.3",
+		"@natlibfi/melinda-commons": "^13.0.19",
 		"@xmldom/xmldom": "^0.9.7",
 		"debug": "^4.4.0",
 		"http-status": "^2.1.0",
