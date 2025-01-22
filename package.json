@@ -34,8 +34,8 @@
 		"watch:test": "cross-env DEBUG=1 NODE_ENV=test nodemon -w src -w test-fixtures --exec 'npm run test:dev'"
 	},
 	"dependencies": {
-		"@natlibfi/melinda-commons": "^13.0.18",
-		"@xmldom/xmldom": "^0.9.6",
+		"@natlibfi/melinda-commons": "^13.0.19-alpha.3",
+		"@xmldom/xmldom": "^0.9.7",
 		"debug": "^4.4.0",
 		"http-status": "^2.1.0",
 		"passport": "^0.7.0",
@@ -44,7 +44,7 @@
 	"devDependencies": {
 		"@babel/cli": "^7.26.4",
 		"@babel/core": "^7.26.0",
-		"@babel/eslint-parser": "^7.25.9",
+		"@babel/eslint-parser": "^7.26.5",
 		"@babel/node": "^7.26.0",
 		"@babel/preset-env": "^7.26.0",
 		"@babel/register": "^7.25.9",
@@ -57,7 +57,7 @@
 		"mocha": "^11.0.1",
 		"nodemon": "^3.1.9",
 		"nyc": "^17.1.0",
-		"undici": "^6.21.0"
+		"undici": "^6.21.1"
 	},
 	"eslintConfig": {
 		"extends": "@natlibfi/melinda-backend"
