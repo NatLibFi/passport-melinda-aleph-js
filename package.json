@@ -48,6 +48,7 @@
 		"@babel/node": "^7.27.1",
 		"@babel/preset-env": "^7.27.2",
 		"@babel/register": "^7.27.1",
+		"@babel/runtime": "^7.27.6",
 		"@natlibfi/eslint-config-melinda-backend": "^3.0.6",
 		"babel-plugin-istanbul": "^7.0.0",
 		"babel-plugin-rewire": "^1.2.0",
