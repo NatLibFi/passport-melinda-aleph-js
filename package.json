@@ -14,7 +14,7 @@
 		"url": "git@github.com:natlibfi/passport-melinda-aleph-js.git"
 	},
 	"license": "MIT",
-	"version": "3.0.9",
+	"version": "3.0.10-alpha.1",
 	"main": "./dist/index.js",
 	"engines": {
 		"node": ">=18"
@@ -34,6 +34,7 @@
 		"watch:test": "cross-env DEBUG=1 NODE_ENV=test nodemon -w src -w test-fixtures --exec 'npm run test:dev'"
 	},
 	"dependencies": {
+		"@babel/runtime": "^7.27.6",
 		"@natlibfi/melinda-commons": "^13.0.21",
 		"@xmldom/xmldom": "^0.9.8",
 		"debug": "^4.4.1",
@@ -48,7 +49,6 @@
 		"@babel/node": "^7.27.1",
 		"@babel/preset-env": "^7.27.2",
 		"@babel/register": "^7.27.1",
-		"@babel/runtime": "^7.27.6",
 		"@natlibfi/eslint-config-melinda-backend": "^3.0.6",
 		"babel-plugin-istanbul": "^7.0.0",
 		"babel-plugin-rewire": "^1.2.0",
