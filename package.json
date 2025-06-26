@@ -14,7 +14,7 @@
 		"url": "git@github.com:natlibfi/passport-melinda-aleph-js.git"
 	},
 	"license": "MIT",
-	"version": "3.0.8",
+	"version": "3.0.9-alpha.1",
 	"main": "./dist/index.js",
 	"engines": {
 		"node": ">=18"
@@ -34,30 +34,31 @@
 		"watch:test": "cross-env DEBUG=1 NODE_ENV=test nodemon -w src -w test-fixtures --exec 'npm run test:dev'"
 	},
 	"dependencies": {
-		"@natlibfi/melinda-commons": "^13.0.19",
+		"@natlibfi/melinda-commons": "^13.0.21",
 		"@xmldom/xmldom": "^0.9.8",
-		"debug": "^4.4.0",
+		"debug": "^4.4.1",
 		"http-status": "^2.1.0",
 		"passport": "^0.7.0",
 		"passport-http": "^0.3.0"
 	},
 	"devDependencies": {
-		"@babel/cli": "^7.26.4",
-		"@babel/core": "^7.26.9",
-		"@babel/eslint-parser": "^7.26.8",
-		"@babel/node": "^7.26.0",
-		"@babel/preset-env": "^7.26.9",
-		"@babel/register": "^7.25.9",
-		"@natlibfi/eslint-config-melinda-backend": "^3.0.5",
+		"@babel/cli": "^7.27.2",
+		"@babel/core": "^7.27.4",
+		"@babel/eslint-parser": "^7.27.5",
+		"@babel/node": "^7.27.1",
+		"@babel/preset-env": "^7.27.2",
+		"@babel/register": "^7.27.1",
+		"@babel/runtime": "^7.27.6",
+		"@natlibfi/eslint-config-melinda-backend": "^3.0.6",
 		"babel-plugin-istanbul": "^7.0.0",
 		"babel-plugin-rewire": "^1.2.0",
 		"chai": "^4.5.0",
 		"cross-env": "^7.0.3",
 		"eslint": "^8.57.1",
-		"mocha": "^11.1.0",
-		"nodemon": "^3.1.9",
+		"mocha": "^11.7.1",
+		"nodemon": "^3.1.10",
 		"nyc": "^17.1.0",
-		"undici": "^6.21.1"
+		"undici": "^6.21.3"
 	},
 	"eslintConfig": {
 		"extends": "@natlibfi/melinda-backend"
