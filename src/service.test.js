@@ -24,10 +24,10 @@ const mockAgent = new MockAgent();
 // We have same URL for both services, so that undici mock can interrupt both calls
 const xServiceURL = 'https://authn';
 const ownAuthzURL = 'https://authn';
-const ownAuthApiKey = 'foobar';
-const userLibrary = 'foo';
-const username = 'foo';
-const password = 'bar';
+const ownAuthApiKey = 'foobar'; // njsscan-ignore
+const userLibrary = 'foo'; // njsscan-ignore
+const username = 'foo'; // njsscan-ignore
+const password = 'bar'; // njsscan-ignore
 
 // eslint-disable-next-line max-lines-per-function
 describe('authentication/service', () => {
