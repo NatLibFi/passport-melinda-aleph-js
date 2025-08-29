@@ -114,7 +114,7 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
           //debugDev(`parseName: obj: ${JSON.stringify(obj)}`)
 
           if (parts.length > 2) {
-            const middle = parts.slice(1,-1).join(' ');
+            const middle = parts.slice(1,-1).join(' '); // elements between first and last
             debugDev(`parseName: middle: ${JSON.stringify(middle)}`);
             return {...obj, middleName: middle};
           }
