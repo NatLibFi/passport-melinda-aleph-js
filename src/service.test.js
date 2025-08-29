@@ -21,6 +21,14 @@ const userData2 = fs.readFileSync(path.resolve(FIXTURES_PATH, 'userData2.json'),
 
 const mockAgent = new MockAgent();
 
+// We have same URL for both services, so that undici mock can interrupt both calls
+const xServiceURL = 'https://authn';
+const ownAuthzURL = 'https://authn';
+const ownAuthApiKey = 'foobar';
+const userLibrary = 'foo';
+const test_user = 'foo';
+const password = 'bar';
+
 // eslint-disable-next-line max-lines-per-function
 describe('authentication/service', () => {
   // eslint-disable-next-line max-lines-per-function
@@ -51,27 +59,19 @@ describe('authentication/service', () => {
       it('Should authenticate the user succesfully', async () => {
         debug(`TEST`);
 
-        // We have same URL for both services, so that undici mock can interrupt both calls
-        const xServiceURL = 'https://authn';
-        const ownAuthzURL = 'https://authn';
-        const ownAuthApiKey = 'foobar';
-        const userLibrary = 'foo';
-        const username = 'foo';
-        const password = 'bar';
-
         const mockPool = mockAgent.get('https://authn');
 
         // https://authn/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
-        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
+        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${test_user}&staff_pass=${password}`})
           .reply(200, authnResponse1);
 
         // https://authn/foo
-        mockPool.intercept({path: `/${username}`})
+        mockPool.intercept({path: `/${test_user}`})
           .reply(HttpStatus.OK, authzResponse1);
 
         debug(`Testing`);
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
-        const user = await service.authenticate({username, password});
+        const user = await service.authenticate({test_user, password});
 
         assert.deepEqual(user, JSON.parse(userData1));
       });
@@ -79,27 +79,19 @@ describe('authentication/service', () => {
       it('Should authenticate the user with two middle names succesfully', async () => {
         debug(`TEST`);
 
-        // We have same URL for both services, so that undici mock can interrupt both calls
-        const xServiceURL = 'https://authn';
-        const ownAuthzURL = 'https://authn';
-        const ownAuthApiKey = 'foobar';
-        const userLibrary = 'foo';
-        const username = 'foo';
-        const password = 'bar';
-
         const mockPool = mockAgent.get('https://authn');
 
         // https://authn/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
-        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
+        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${test_user}&staff_pass=${password}`})
           .reply(200, authnResponse4);
 
         // https://authn/foo
-        mockPool.intercept({path: `/${username}`})
+        mockPool.intercept({path: `/${test_user}`})
           .reply(HttpStatus.OK, authzResponse1);
 
         debug(`Testing`);
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
-        const user = await service.authenticate({username, password});
+        const user = await service.authenticate({test_user, password});
 
         assert.deepEqual(user, JSON.parse(userData2));
       });
@@ -107,25 +99,17 @@ describe('authentication/service', () => {
 
       it('Should fail to authenticate the user (Invalid credentials)', async () => {
 
-        // We have same URL for both services, so that undici mock can interrupt both calls
-        const xServiceURL = 'https://authn';
-        const ownAuthzURL = 'https://authn';
-        const ownAuthApiKey = 'foobar';
-        const userLibrary = 'foo';
-        const username = 'foo';
-        const password = 'bar';
-
         // https://authn/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
 
         const mockPool = mockAgent.get('https://authn');
 
-        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
+        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${test_user}&staff_pass=${password}`})
           .reply(200, authnResponse2);
 
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
 
         try {
-          await service.authenticate({username, password});
+          await service.authenticate({test_user, password});
           throw new Error('Should throw');
         } catch (err) {
           //debug(`Error: ${err.message}`);
@@ -134,22 +118,16 @@ describe('authentication/service', () => {
       });
 
       it('Should fail to authenticate the user (Reply not ok)', async () => {
-        const xServiceURL = 'https://authn';
-        const ownAuthzURL = 'https://authn';
-        const ownAuthApiKey = 'foobar';
-        const userLibrary = 'foo';
-        const username = 'foo';
-        const password = 'bar';
 
         const mockPool = mockAgent.get('https://authn');
 
-        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
+        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${test_user}&staff_pass=${password}`})
           .reply(200, authnResponse3);
 
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
 
         try {
-          await service.authenticate({username, password});
+          await service.authenticate({test_user, password});
           throw new Error('Should throw');
         } catch (err) {
           //debug(`Error: ${err.message}`);
@@ -160,22 +138,15 @@ describe('authentication/service', () => {
       it('Should fail to authenticate the user (Unexpected error)', async () => {
 
         // We have same URL for both services, so that undici mock can interrupt both calls
-        const xServiceURL = 'https://authn';
-        const ownAuthzURL = 'https://authn';
-        const ownAuthApiKey = 'foobar';
-        const userLibrary = 'foo';
-        const username = 'foo';
-        const password = 'bar';
-
         const mockPool = mockAgent.get('https://authn');
 
-        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
+        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${test_user}&staff_pass=${password}`})
           .reply(500);
 
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
 
         try {
-          await service.authenticate({username, password});
+          await service.authenticate({test_user, password});
           throw new Error('Should throw');
         } catch (err) {
           //debug(`Error: ${err.message}`);
@@ -186,25 +157,18 @@ describe('authentication/service', () => {
       it('Should fail to authenticate the user (Unexpected error in authz service)', async () => {
 
         // We have same URL for both services, so that undici mock can interrupt both calls
-        const xServiceURL = 'https://authn';
-        const ownAuthzURL = 'https://authn';
-        const ownAuthApiKey = 'foobar';
-        const userLibrary = 'foo';
-        const username = 'foo';
-        const password = 'bar';
-
         const mockPool = mockAgent.get('https://authn');
 
-        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
+        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${test_user}&staff_pass=${password}`})
           .reply(200, authnResponse1);
 
-        mockPool.intercept({path: `/${username}`})
+        mockPool.intercept({path: `/${test_user}`})
           .reply(HttpStatus.INTERNAL_SERVER_ERROR);
 
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
 
         try {
-          await service.authenticate({username, password});
+          await service.authenticate({test_user, password});
           throw new Error('Should throw');
         } catch (err) {
           //debug(`Error: ${err.message}`);
