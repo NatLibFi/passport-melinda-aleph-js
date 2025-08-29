@@ -7,6 +7,7 @@ import createDebugLogger from 'debug';
 const debugDev = createDebugLogger('@natlibfi/passport-melinda-aleph:dev');
 const debugDevData = debugDev.extend('data');
 
+// eslint-disable-next-line max-lines-per-function
 export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzApiKey}) {
   const xBaseURL = new URL(xServiceURL);
 
@@ -15,7 +16,7 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
 
   return {authenticate};
 
-  // eslint-disable-next-line max-statements
+// eslint-disable-next-line max-lines-per-function
   async function authenticate({username, password}) {
     const requestURL = new URL(xBaseURL);
 
@@ -40,6 +41,7 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
       return {...userInfo, authorization: ownTags};
     }
 
+    // This is not tested
     if (response?.headers?.has('WWW-Authenticate')) {
       response.headers.delete('WWW-Authenticate');
       throw new AuthenticationError(response.status, body);
@@ -101,13 +103,17 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
 
         function parseName(value) {
           const parts = value.split(/ /u);
+          debugDev(`parseName: value: ${value}, parts: ${JSON.stringify(parts)}`)
           const obj = {
-            givenName: parts[0],
-            familyName: parts.slice(-1)[0]
+            givenName: parts[0], //first element
+            familyName: parts.slice(-1)[0] //last element
           };
+          //debugDev(`parseName: obj: ${JSON.stringify(obj)}`)
 
           if (parts.length > 2) {
-            return {...obj, middleName: parts.slice(2).join(' ')};
+            const middle = parts.slice(1,-1).join(' ');
+            debugDev(`parseName: middle: ${JSON.stringify(middle)}`);
+            return {...obj, middleName: middle};
           }
 
           return obj;

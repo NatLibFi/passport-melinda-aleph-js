@@ -1,30 +1,39 @@
 import fs from 'fs';
 import path from 'path';
-import {expect} from 'chai';
+import assert from 'node:assert';
+import {describe, it, before, after} from 'node:test';
 import HttpStatus from 'http-status';
-import * as testContext from './service';
+import * as testContext from './service.js';
 import {Error as AuthenticationError} from '@natlibfi/melinda-commons';
 import {Agent, MockAgent, setGlobalDispatcher} from 'undici';
 import createDebugLogger from 'debug';
 
 const debug = createDebugLogger('@natlibfi/passport-melinda-aleph:test');
 
-const FIXTURES_PATH = path.join(__dirname, '../test-fixtures/authentication');
+const FIXTURES_PATH = path.join(import.meta.dirname, '../test-fixtures/authentication');
 const authnResponse1 = fs.readFileSync(path.resolve(FIXTURES_PATH, 'authnResponse1.xml'), 'utf8');
 const authnResponse2 = fs.readFileSync(path.resolve(FIXTURES_PATH, 'authnResponse2.xml'), 'utf8');
 const authnResponse3 = fs.readFileSync(path.resolve(FIXTURES_PATH, 'authnResponse3.xml'), 'utf8');
+const authnResponse4 = fs.readFileSync(path.resolve(FIXTURES_PATH, 'authnResponse4.xml'), 'utf8');
 const authzResponse1 = fs.readFileSync(path.resolve(FIXTURES_PATH, 'authzResponse1.json'), 'utf8');
 const userData1 = fs.readFileSync(path.resolve(FIXTURES_PATH, 'userData1.json'), 'utf8');
+const userData2 = fs.readFileSync(path.resolve(FIXTURES_PATH, 'userData2.json'), 'utf8');
 
 const mockAgent = new MockAgent();
 
+// eslint-disable-next-line max-lines-per-function
 describe('authentication/service', () => {
+  // eslint-disable-next-line max-lines-per-function
   describe('factory', () => {
     it('Should create the expected object', () => {
       const service = testContext.createService({xServiceURL: 'https://authn', userLibrary: 'foo'});
-      expect(service).to.be.an('object').and.respondTo('authenticate');
+      assert.ok(service.constructor === Object );
+      assert.ok(typeof service.authenticate === 'function');
+      //assert.ok(service.authenticate());
+      //expect(service).to.be.an('object').and.respondTo('authenticate');
     });
 
+    // eslint-disable-next-line max-lines-per-function
     describe('#authenticate', () => {
 
       before(() => {
@@ -64,8 +73,37 @@ describe('authentication/service', () => {
         const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
         const user = await service.authenticate({username, password});
 
-        expect(user).to.eql(JSON.parse(userData1));
+        assert.deepEqual(user, JSON.parse(userData1));
       });
+
+      it('Should authenticate the user with two middle names succesfully', async () => {
+        debug(`TEST`);
+
+        // We have same URL for both services, so that undici mock can interrupt both calls
+        const xServiceURL = 'https://authn';
+        const ownAuthzURL = 'https://authn';
+        const ownAuthApiKey = 'foobar';
+        const userLibrary = 'foo';
+        const username = 'foo';
+        const password = 'bar';
+
+        const mockPool = mockAgent.get('https://authn');
+
+        // https://authn/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
+        mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
+          .reply(200, authnResponse4);
+
+        // https://authn/foo
+        mockPool.intercept({path: `/${username}`})
+          .reply(HttpStatus.OK, authzResponse1);
+
+        debug(`Testing`);
+        const service = testContext.createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthApiKey});
+        const user = await service.authenticate({username, password});
+
+        assert.deepEqual(user, JSON.parse(userData2));
+      });
+
 
       it('Should fail to authenticate the user (Invalid credentials)', async () => {
 
@@ -91,7 +129,7 @@ describe('authentication/service', () => {
           throw new Error('Should throw');
         } catch (err) {
           //debug(`Error: ${err.message}`);
-          expect(err).to.be.an.instanceof(AuthenticationError);
+          assert.ok(err instanceof AuthenticationError);
         }
       });
 
@@ -115,7 +153,7 @@ describe('authentication/service', () => {
           throw new Error('Should throw');
         } catch (err) {
           //debug(`Error: ${err.message}`);
-          expect(err).to.be.an.instanceof(AuthenticationError);
+          assert.ok(err instanceof AuthenticationError);
         }
       });
 
@@ -141,7 +179,7 @@ describe('authentication/service', () => {
           throw new Error('Should throw');
         } catch (err) {
           //debug(`Error: ${err.message}`);
-          expect(err).to.be.an('error');
+          assert.ok(err instanceof Error);
         }
       });
 
@@ -170,7 +208,8 @@ describe('authentication/service', () => {
           throw new Error('Should throw');
         } catch (err) {
           //debug(`Error: ${err.message}`);
-          expect(err).to.be.an('error');
+          // HOWTO TEST
+          assert.ok(err instanceof Error);
         }
       });
     });
