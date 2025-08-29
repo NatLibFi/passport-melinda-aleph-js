@@ -3,7 +3,7 @@ import path from 'path';
 import assert from 'node:assert';
 import {describe, it, before, after, beforeEach} from 'node:test';
 import HttpStatus from 'http-status';
-import * as testContext from './service.js';
+import * as testContext from '../src/service.js';
 import {Error as AuthenticationError} from '@natlibfi/melinda-commons';
 import {Agent, MockAgent, setGlobalDispatcher} from 'undici';
 import createDebugLogger from 'debug';
