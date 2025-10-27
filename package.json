@@ -32,17 +32,17 @@
 		"test": "npm run lint && npm run test:base"
 	},
 	"dependencies": {
-		"@natlibfi/melinda-commons": "next",
+		"@natlibfi/melinda-commons": "^14.0.0-alpha.5",
 		"@xmldom/xmldom": "^0.9.8",
-		"debug": "^4.4.1",
+		"debug": "^4.4.3",
 		"http-status": "^2.1.0",
 		"passport": "^0.7.0",
 		"passport-http": "^0.3.0"
 	},
 	"devDependencies": {
-		"cross-env": "^10.0.0",
-		"esbuild": "^0.25.9",
-		"eslint": "^9.34.0",
-		"undici": "^7.15.0"
+		"cross-env": "^10.1.0",
+		"esbuild": "^0.25.11",
+		"eslint": "^9.38.0",
+		"undici": "^7.16.0"
 	}
 }
