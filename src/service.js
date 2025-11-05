@@ -7,6 +7,7 @@ import createDebugLogger from 'debug';
 const debugDev = createDebugLogger('@natlibfi/passport-melinda-aleph:dev');
 const debugDevData = debugDev.extend('data');
 
+// eslint-disable-next-line max-lines-per-function
 export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzApiKey}) {
   const xBaseURL = new URL(xServiceURL);
 
@@ -15,7 +16,7 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
 
   return {authenticate};
 
-  // eslint-disable-next-line max-statements
+// eslint-disable-next-line max-lines-per-function
   async function authenticate({username, password}) {
     const requestURL = new URL(xBaseURL);
 
@@ -40,6 +41,7 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
       return {...userInfo, authorization: ownTags};
     }
 
+    // This is not tested
     if (response?.headers?.has('WWW-Authenticate')) {
       response.headers.delete('WWW-Authenticate');
       throw new AuthenticationError(response.status, body);
@@ -49,15 +51,18 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
 
     function checkForErrors(doc) {
       if (invalidReply() || hasErrors()) {
-        throw new AuthenticationError(400, body);
+        debugDev(`We have some kind of error`)
+        throw new AuthenticationError(HttpStatus.BAD_REQUEST, 'X-server authentication error');
       }
 
       function invalidReply() {
         const nodeList = doc.getElementsByTagName('reply');
+        // No <reply> element, or first <reply> -element is not "ok"
         return nodeList.length === 0 ? true : nodeList.length > 0 && nodeList.item(0).textContent !== 'ok';
       }
 
       function hasErrors() {
+        // there are <error> elements
         return doc.getElementsByTagName('error').length > 0;
       }
     }
@@ -101,13 +106,17 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
 
         function parseName(value) {
           const parts = value.split(/ /u);
+          debugDev(`parseName: value: ${value}, parts: ${JSON.stringify(parts)}`)
           const obj = {
-            givenName: parts[0],
-            familyName: parts.slice(-1)[0]
+            givenName: parts[0], //first element
+            familyName: parts.slice(-1)[0] //last element
           };
+          //debugDev(`parseName: obj: ${JSON.stringify(obj)}`)
 
           if (parts.length > 2) {
-            return {...obj, middleName: parts.slice(2).join(' ')};
+            const middle = parts.slice(1,-1).join(' '); // elements between first and last
+            debugDev(`parseName: middle: ${JSON.stringify(middle)}`);
+            return {...obj, middleName: middle};
           }
 
           return obj;
@@ -117,19 +126,19 @@ export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzAp
 
     async function getOwnTags(username) {
       const url = new URL(`${ownAuthzURL}/${username}`);
-      debugDev(`Fetching: ${url}`);
+      debugDev(`Fetching OWN tags: ${url}`);
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${ownAuthzApiKey}`,
           Accept: 'application/json'
         }
       });
-      debugDevData(`Response status: ${response.status}`);
+      debugDevData(`OWN tags response status: ${response.status}`);
       if (response.status === HttpStatus.OK) {
         return response.json();
       }
 
-      throw new Error(`OWN auth API call failed: ${await response.text()}`);
+      throw new Error(`OWN auth API call failed (${response.status}): ${await response.text()}`);
     }
   }
 }

@@ -1,5 +1,5 @@
 import {BasicStrategy} from 'passport-http';
-import {createService} from './service';
+import {createService} from './service.js';
 import {Error as AuthenticationError} from '@natlibfi/melinda-commons';
 
 export class AlephStrategy extends BasicStrategy {
@@ -21,6 +21,6 @@ export class AlephStrategy extends BasicStrategy {
         });
     });
 
-    this.name = 'melinda'; // eslint-disable-line functional/no-this-expressions
+    this.name = 'melinda';
   }
 }
