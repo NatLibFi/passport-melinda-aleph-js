@@ -29,9 +29,7 @@ const userLibrary = 'foo'; // njsscan-ignore: node_username
 const username = 'foo'; // njsscan-ignore: node_username
 const password = 'bar'; // njsscan-ignore: node_password
 
-// eslint-disable-next-line max-lines-per-function
 describe('authentication/service', () => {
-  // eslint-disable-next-line max-lines-per-function
   describe('factory', () => {
     it('Should create the expected object', () => {
       const service = testContext.createService({xServiceURL: 'https://authn', userLibrary: 'foo'});
@@ -41,7 +39,6 @@ describe('authentication/service', () => {
       //expect(service).to.be.an('object').and.respondTo('authenticate');
     });
 
-    // eslint-disable-next-line max-lines-per-function
     describe('#authenticate', () => {
 
       before(() => {
