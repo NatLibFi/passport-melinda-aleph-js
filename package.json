@@ -13,11 +13,11 @@
 		"url": "https://github.com/NatLibFi/passport-melinda-aleph-js"
 	},
 	"license": "MIT",
-	"version": "4.0.1",
+	"version": "5.0.0-alpha.2",
 	"main": "./dist/index.js",
 	"type": "module",
 	"engines": {
-		"node": ">=22"
+		"node": ">=24"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -42,7 +42,7 @@
 	"devDependencies": {
 		"cross-env": "^10.1.0",
 		"esbuild": "^0.28.0",
-		"eslint": "^10.3.0",
+		"eslint": "^10.9.1",
 		"undici": "^7.25.0"
 	}
 }
