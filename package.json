@@ -42,7 +42,7 @@
 	"devDependencies": {
 		"cross-env": "^10.1.0",
 		"esbuild": "^0.28.0",
-		"eslint": "^10.3.0",
+		"eslint": "^10.9.1",
 		"undici": "^7.25.0"
 	}
 }
