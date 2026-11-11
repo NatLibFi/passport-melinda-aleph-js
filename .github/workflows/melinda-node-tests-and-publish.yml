@@ -43,6 +43,7 @@ jobs:
       - uses: mikaelvesavuori/license-compliance-action@v1
         with:
           exclude_pattern: /^@natlibfi/
+          direct: true
 
   njsscan:
     name: Njsscan check
