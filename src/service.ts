@@ -30,6 +30,7 @@ export interface MelindaUser {
   authorization: string[];
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzApiKey}: AlephOptions) {
   const xBaseURL = new URL(xServiceURL);
 

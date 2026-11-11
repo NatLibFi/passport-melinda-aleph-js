@@ -22,8 +22,8 @@ const userData2 = fs.readFileSync(path.resolve(FIXTURES_PATH, 'userData2.json'),
 const mockAgent = new MockAgent();
 
 // We have same URL for both services, so that undici mock can interrupt both calls
-const xServiceURL = 'https://authn';
-const ownAuthzURL = 'https://authn';
+const xServiceURL = 'https://example.invalid';
+const ownAuthzURL = 'https://example.invalid';
 const ownAuthzApiKey = 'foobar'; // njsscan-ignore: node_api_key
 const userLibrary = 'foo'; // njsscan-ignore: node_username
 const username = 'foo'; // njsscan-ignore: node_username
@@ -58,13 +58,13 @@ describe('authentication/service', () => {
       it('Should authenticate the user succesfully', async () => {
         debug(`TEST 1`);
 
-        const mockPool = mockAgent.get('https://authn');
+        const mockPool = mockAgent.get('https://example.invalid');
 
-        // https://authn/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
+        // https://example.invalid/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
         mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
           .reply(200, authnResponse1);
 
-        // https://authn/foo
+        // https://example.invalid/foo
         mockPool.intercept({path: `/${username}`})
           .reply(HttpStatus.OK, authzResponse1);
 
@@ -77,13 +77,13 @@ describe('authentication/service', () => {
       it('Should authenticate the user with two middle names succesfully', async () => {
         debug(`TEST 2`);
 
-        const mockPool = mockAgent.get('https://authn');
+        const mockPool = mockAgent.get('https://example.invalid');
 
-        // https://authn/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
+        // https://example.invalid/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
         mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
           .reply(200, authnResponse4);
 
-        // https://authn/foo
+        // https://example.invalid/foo
         mockPool.intercept({path: `/${username}`})
           .reply(HttpStatus.OK, authzResponse1);
 
@@ -96,9 +96,9 @@ describe('authentication/service', () => {
 
       it('Should fail to authenticate the user (Invalid credentials)', async () => {
 
-        // https://authn/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
+        // https://example.invalid/?op=user-auth&library=foo&staff_user=foo&staff_pass=bar
 
-        const mockPool = mockAgent.get('https://authn');
+        const mockPool = mockAgent.get('https://example.invalid');
 
         mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
           .reply(200, authnResponse2);
@@ -120,7 +120,7 @@ describe('authentication/service', () => {
 
       it('Should fail to authenticate the user (Reply not ok)', async () => {
 
-        const mockPool = mockAgent.get('https://authn');
+        const mockPool = mockAgent.get('https://example.invalid');
 
         mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
           .reply(200, authnResponse3);
@@ -143,7 +143,7 @@ describe('authentication/service', () => {
       it('Should fail to authenticate the user (Unexpected error)', async () => {
 
         // We have same URL for both services, so that undici mock can interrupt both calls
-        const mockPool = mockAgent.get('https://authn');
+        const mockPool = mockAgent.get('https://example.invalid');
 
         // 500 error from X-server
         mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
@@ -169,7 +169,7 @@ describe('authentication/service', () => {
 
       it('Should fail to authenticate the user (Unexpected error in authz service)', async () => {
 
-        const mockPool = mockAgent.get('https://authn');
+        const mockPool = mockAgent.get('https://example.invalid');
 
         // OK from X-server
         mockPool.intercept({path: `/?op=user-auth&library=${userLibrary}&staff_user=${username}&staff_pass=${password}`})
