@@ -1,13 +1,15 @@
 import {BasicStrategy} from 'passport-http';
-import {createService} from './service.js';
+import {createService, type AlephOptions} from './service.ts';
 import {Error as AuthenticationError} from '@natlibfi/melinda-commons';
 
+export type {AlephOptions, MelindaUser} from './service.ts';
+
 export class AlephStrategy extends BasicStrategy {
-  constructor({xServiceURL, userLibrary, ownAuthzURL, ownAuthzApiKey}) {
-    const AuthenticationService = createService({xServiceURL, userLibrary, ownAuthzURL, ownAuthzApiKey});
+  constructor(options: AlephOptions) {
+    const {authenticate} = createService(options);
 
     super((username, password, done) => {
-      AuthenticationService.authenticate({username, password})
+      authenticate({username, password})
         .then(user => {
           done(null, user);
         })
